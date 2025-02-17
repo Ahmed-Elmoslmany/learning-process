@@ -41,23 +41,32 @@ class CandidateController():
         }, HTTPStatus.CREATED)
     
 
-    def create_csv(candidate_id):
-        candidate = DBService.get_candidate(candidate_id)
-        csv = Csv(candidate.firstname, ['firstname', 'lastname', 'email'], [[candidate.firstname, candidate.lastname, candidate.email]])
-        if csv.generate():
-            csv_path = csv.get_file_path()
+    def handle_candidates_report():
+        extension = request.args.get('extension')
+        if extension != 'csv' or not request.args.get('candidate_id'):
             return jsonify({
-                "status": "success",
-                "data": {
-                    "path": csv_path
-                }
-            }, HTTPStatus.OK)
-            
-        return jsonify({
-                "status": "fail",
-                "data": {
-                    "message": "Error while generating the file"
-                }
-        }, HTTPStatus.SERVICE_UNAVAILABLE)
+                    "status": "fail",
+                    "data": {
+                        "message": "Invalid extension or candidate id"
+                    }
+            }, HTTPStatus.BAD_REQUEST)    
+        else :
+            candidate = DBService.get_candidate(request.args.get('candidate_id'))
+            csv = Csv(candidate.firstname, ['firstname', 'lastname', 'email'], [[candidate.firstname, candidate.lastname, candidate.email]])
+            if csv.generate():
+                csv_path = csv.get_file_path()
+                return jsonify({
+                    "status": "success",
+                    "data": {
+                        "path": csv_path
+                    }
+                }, HTTPStatus.OK)
+                
+            return jsonify({
+                    "status": "fail",
+                    "data": {
+                        "message": "Error while generating the file"
+                    }
+            }, HTTPStatus.SERVICE_UNAVAILABLE)
 
     
