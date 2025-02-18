@@ -15,7 +15,9 @@ dictConfig(
                 "formatter": "default",
             },
             "file": {
-                "class": "logging.FileHandler",
+                "class": "logging.handlers.RotatingFileHandler",
+                "maxBytes": 1000000,
+                "backupCount": 5,
                 "filename": "flask.log",
                 "formatter": "default",
             },
