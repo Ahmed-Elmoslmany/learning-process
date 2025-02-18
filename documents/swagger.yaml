@@ -24,7 +24,7 @@ tags:
 schemes:
 - "http"
 paths:
-  /candidates/report:
+  /candidates:
     post:
       tags:
       - "candidates"
