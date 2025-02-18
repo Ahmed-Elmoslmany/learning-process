@@ -1,0 +1,224 @@
+---
+swagger: "2.0"
+info:
+  description: "This is a sample server Petstore server.  You can find out more about\
+    \ Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).\
+    \  For this sample, you can use the api key `special-key` to test the authorization\
+    \ filters."
+  version: "1.0.7"
+  title: "Swagger Petstore"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "apiteam@swagger.io"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "localhost:5000"
+basePath: "/"
+tags:
+- name: "candidates"
+  description: "Everything about your Pets"
+  externalDocs:
+    description: "Find out more"
+    url: "http://127.0.0.1:5000/"
+schemes:
+- "http"
+paths:
+  /candidates/report:
+    post:
+      tags:
+      - "candidates"
+      summary: "create candidate"
+      parameters:
+        - name: "extension"
+          in: "query"
+          description: "The type of extension"
+          required: true
+          type: "string"
+        - name: "candidate_id"
+          in: "query"
+          description: "ID of the candidate"
+          required: true
+          type: "string"
+      description: ""
+      operationId: "uploadFile"
+      consumes:
+      - "multipart/form-data"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          $ref: "#/responses/Ok"
+        400:
+          $ref: '#/responses/BadRequest'
+      security:
+      - petstore_auth:
+        - "write:pets"
+        - "read:pets"
+  /candidates:
+    post:
+      tags:
+      - "candidates"
+      summary: "create candidate"
+      description: ""
+      operationId: "addCandidate"
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/json"
+      - "application/xml"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "candidate object that needs to be added to the database"
+        required: true
+        schema:
+          $ref: "#/definitions/Candidates"
+      responses:
+        201:
+          $ref: '#/responses/Created'
+        400:
+          $ref: '#/responses/BadRequest'
+      security:
+      - petstore_auth:
+        - "write:pets"
+        - "read:pets"
+  /candidates/{candidateId}:
+    get:
+      tags:
+      - "candidates"
+      summary: "Find candidate by ID"
+      description: "Returns a single candidate"
+      operationId: "getCandidateById"
+      produces:
+      - "application/json"
+      - "application/xml"
+      parameters:
+      - name: "candidateId"
+        in: "path"
+        description: "ID of candidate to return"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          $ref: "#/responses/Ok"
+        404:
+          $ref: "#/responses/NotFound"
+      security:
+      - api_key: []
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+  petstore_auth:
+    type: "oauth2"
+    authorizationUrl: "https://127.0.0.1:5000/oauth/authorize"
+    flow: "implicit"
+    scopes:
+      read:pets: "read your pets"
+      write:pets: "modify pets in your account"
+definitions:
+  ApiResponseCreated:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+      data:
+          $ref: '#/definitions/Candidate'
+  
+  ApiResponseOk:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+      data:
+          $ref: '#/definitions/Candidate'        
+          
+  ApiResponseError:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+      data:
+        type: "object"
+        properties:
+          message:
+            type: string
+            
+  Candidate:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      firstname:
+        type: "string"
+        example: "ahmed"
+      lastname:
+        type: "string"
+        example: "elmoslmany"
+      email:
+        type: "string"
+        example: "ahmedelmoslmany74@gmail.com"
+  Candidates:
+    type: "object"
+    required:
+    - "firstname"
+    - "lastname"
+    - "email"
+    properties:
+      firstname:
+        type: "string"
+        example: "ahmed"
+      lastname:
+        type: "string"
+        example: "elmoslmany"
+      email:
+        type: "string"
+        example: "ahmedelmoslmany74@gmail.com"
+responses:
+  Created:
+    description: "Created"
+    schema:
+      $ref: '#/definitions/ApiResponseCreated'
+  Ok:
+    description: "Ok"
+    schema:
+      $ref: '#/definitions/ApiResponseOk'      
+  BadRequest:
+    description: "Bad Request"
+    schema:
+      $ref: '#/definitions/ApiResponseError'
+  NotFound:
+    description: "Not Found"
+    schema:
+      $ref: '#/definitions/ApiResponseError'
+  # Unauthorized:
+  #   description: "Unauthorized"
+  #   schema:
+  #     $ref: '#/definitions/ApiResponseUnauthorized'
+  # NotFound:
+  #   description: "Not Found"
+  #   schema:
+  #     $ref: '#/definitions/ApiResponseNotFound'
+  # Conflict:
+  #   description: "Conflict"
+  #   schema:
+  #     $ref: '#/definitions/ApiResponseConflict'
+  # InternalServerError:
+  #   description: "Internal Server Error"
+  #   schema:
+  #     $ref: '#/definitions/ApiResponseInternalServerError'
+  # NotImplemented:
+  #   description: "Not Implemented"
+  #   schema:
+  #     $ref: '#/definitions/ApiResponseNotImplemented'
+  # ServiceUnavailable:
+  #   description: "Service Unavailable"
+  #   schema:
+  #     $ref: '#/definitions/ApiResponseServiceUnavailable'
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"
