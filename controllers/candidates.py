@@ -16,7 +16,7 @@ class CandidateController():
                     "data": {
                         "message": "Candidate not found"
                     }
-            }, HTTPStatus.BAD_REQUEST)
+            }, HTTPStatus.NOT_FOUND)
             
         app.logger.info(f'candidate found!, id: {candidate.id} firstname: {candidate.firstname} lastname: {candidate.lastname} email: {candidate.email}')
         
