@@ -1,2 +1,5 @@
 instance/
 __pycache__/
+flask.log/
+flask.log
+./flask.log
