@@ -1,5 +1,6 @@
 from app import app
 import controllers.candidates as candidates
+from flask import request
 
 @app.route('/bing')
 def bing():
@@ -11,8 +12,6 @@ def get_candidate(id):
 
 @app.route('/candidates', methods =['POST'])
 def create_candidate():
+    if request.args.get('extension') == 'csv':
+        return candidates.CandidateController.handle_candidates_report()
     return candidates.CandidateController.create_candidates()
-
-@app.route('/candidates/report', methods =['POST'])
-def handle_candidates_report():
-    return candidates.CandidateController.handle_candidates_report()
