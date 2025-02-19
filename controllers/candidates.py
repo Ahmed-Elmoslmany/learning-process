@@ -6,7 +6,16 @@ from services.csv_service import Csv
 
 class CandidateController():
 
-    def get_candidates(candidate_id):
+    def get_candidates():
+        candidates = DBService.get_candidates()
+        serilized_candidates = [{"id": candidate.id, "firstname": candidate.firstname, "lastname": candidate.lastname, "email": candidate.email} for candidate in candidates]
+        
+        return jsonify({
+            "status": "success",
+            "data": serilized_candidates
+        }, HTTPStatus.OK)
+        
+    def get_candidate(candidate_id):
         candidate = DBService.get_candidate(candidate_id)
         if not candidate:
             app.logger.warning('can not found candidate')
@@ -30,13 +39,13 @@ class CandidateController():
             }
         }, HTTPStatus.OK)
 
-    def create_candidates():
+    def create_candidate():
         data = request.get_json()
 
         if not data or not 'firstname' or not 'lastname' or not 'email' in data:
             app.logger.warning('candidate data not provided')
             return jsonify({
-                "status": "Fail",
+                "status": "fail",
                 "data": {
                     "message": "firstname, lastname and email is required"
                 }
@@ -55,10 +64,52 @@ class CandidateController():
             }
         }, HTTPStatus.CREATED)
     
+    def delete_candidate(candidate_id):
+        if DBService.delete_candidate(candidate_id):
+            return jsonify({
+                "status": "success",
+                "data": {
+                    "message": "candidate deleted successfully"
+            }
+        }, HTTPStatus.CREATED)
+        else:
+            return jsonify({
+                "status": "fail",
+                "data": {
+                    "message": "provide valid candidate id"
+                }
+            }, HTTPStatus.BAD_REQUEST)    
+            
+            
+    def update_candidate(candidate_id):
+        data = request.get_json()
+        
+        new_candidate = DBService.update_candidate(candidate_id, data)
+        
+        if new_candidate:
+            return jsonify({
+                "status": "success",
+                "data": {
+                    "id": new_candidate.id,
+                    "firstname": new_candidate.firstname,
+                    "lastname": new_candidate.lastname,
+                    "email": new_candidate.email
+            }
+        }, HTTPStatus.CREATED)
+        else:
+            return jsonify({
+                "status": "fail",
+                "data": {
+                    "message": "candidate not found, provide valid candidate id"
+                }
+            }, HTTPStatus.BAD_REQUEST)    
+                
+        
 
-    def handle_candidates_report():
-        extension = request.args.get('extension')
-        if extension != 'csv' or not request.args.get('candidate_id'):
+    def handle_candidates_report(candidate_id):
+        data = request.get_json()
+        print(data)
+        if not 'extension' in data or data['extension'] != 'csv':
             app.logger.warning('invalid report extension or candidate id')
             
             return jsonify({
@@ -68,7 +119,7 @@ class CandidateController():
                     }
             }, HTTPStatus.BAD_REQUEST)    
         else :
-            candidate = DBService.get_candidate(request.args.get('candidate_id'))
+            candidate = DBService.get_candidate(candidate_id)
             csv = Csv(candidate.firstname, ['firstname', 'lastname', 'email'], [[candidate.firstname, candidate.lastname, candidate.email]])
             if csv.generate():
                 csv_path = csv.get_file_path()
@@ -87,4 +138,5 @@ class CandidateController():
                     }
             }, HTTPStatus.SERVICE_UNAVAILABLE)
 
+    
     
