@@ -14,6 +14,10 @@ def get_candidates():
 def create_candidate():
     return candidates.CandidateController.create_candidate()
 
+@app.route('/candidates/<int:id>')
+def get_candidate(id):
+    return candidates.CandidateController.get_candidate(id)
+
 @app.route('/candidates/<int:id>', methods=['POST'])
 def handle_candidates_report(id):
     return candidates.CandidateController.handle_candidates_report(id)

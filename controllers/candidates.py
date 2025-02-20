@@ -95,7 +95,7 @@ class CandidateController():
                     "lastname": new_candidate.lastname,
                     "email": new_candidate.email
             }
-        }, HTTPStatus.CREATED)
+        }, HTTPStatus.OK)
         else:
             return jsonify({
                 "status": "fail",
