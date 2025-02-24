@@ -9,7 +9,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///candidates.db"
 
 db.init_app(app)
 
-from routes import *
+from routes.candidates import *
 
 if(__name__ == '__main__'):
     app.run()
