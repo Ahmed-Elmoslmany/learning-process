@@ -108,6 +108,7 @@ class GenerateCandidateCSVControler:
         csv_retriever.generate_csv()
         return self.serializer(csv_retriever.retrieve_csv_path()).serialize(self._request.path), http.HTTPStatus.OK
 
+
 class _CandidateSingleSerializer:
     def __init__(self, candidate):
         self.candidate = candidate
