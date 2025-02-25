@@ -90,7 +90,7 @@ class DeleteCandidateController:
         return self.serializer(retrieved_message).serialize(self._request.path), http.HTTPStatus.OK 
 
 
-class GenerateCandidateCSVControler:
+class GenerateCandidateCSVController:
     def __init__(self, request):
         self._request = request
     
