@@ -14,6 +14,10 @@ def get_candidate(id):
 def create_candidate():
     return candidates.CreateCandidateController(fl.request).create_candidate()
 
+@app.route('/candidates/report', methods =['POST'])
+def generate_candidate_report():
+    return candidates.GenerateCandidateCSVControler(fl.request).get_csv()
+
 @app.route('/candidates/<int:id>', methods=['PUT'])
 def update_candidate(id):
     return candidates.UpdateCandidateController(fl.request).update_candidate()

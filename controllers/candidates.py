@@ -1,5 +1,9 @@
 from app import app
 import http
+import csv
+import os
+import services.csv_service as cs
+
 
 class GetAllCandidatesController:
     def __init__(self, request):
@@ -86,6 +90,24 @@ class DeleteCandidateController:
         return self.serializer(retrieved_message).serialize(self._request.path), http.HTTPStatus.OK 
 
 
+class GenerateCandidateCSVControler:
+    def __init__(self, request):
+        self._request = request
+    
+    @property
+    def serializer(self):
+        return _CandidateCSVSerializer
+    
+    @property
+    def retriever(self):
+        return _CandidateCSVRetriever    
+
+    def get_csv(self):
+        retrieved_candidate = Candidate("ahmed", "elmoslmany")
+        csv_retriever = self.retriever(retrieved_candidate)
+        csv_retriever.generate_csv()
+        return self.serializer(csv_retriever.retrieve_csv_path()).serialize(self._request.path), http.HTTPStatus.OK
+
 class _CandidateSingleSerializer:
     def __init__(self, candidate):
         self.candidate = candidate
@@ -119,6 +141,19 @@ class _CandidateSerializer:
         }                
 
 
+class _CandidateCSVSerializer:
+    def __init__(self, csv_path):
+        self._csv_path = csv_path
+        
+    def serialize(self, path):
+        return {
+            "path": path,
+            "data": {
+                "csvPath": self._csv_path
+            }
+        }
+
+
 class _CandidateMessageSerializer:
     def __init__(self, message):
         self._message = message
@@ -146,11 +181,36 @@ class _CandidateRetriever:
     def delete_one(self):
         return Message('candidate deleted')
     
+
+class _CandidateCSVRetriever:
+    def __init__(self, candidate):
+        self._csv = CSV(candidate.first_name, ['first_name', 'last_name'], [[candidate.first_name, candidate.last_name]])
+        
+    def generate_csv(self):
+        try:
+            with open(self._csv.filename, 'w') as csvfile:
+                csvwriter = csv.writer(csvfile)
+
+                csvwriter.writerow(self._csv.fields)
+                csvwriter.writerows(self._csv.data)
+        except:
+            return False
+        
+    def retrieve_csv_path(self):
+        return f'{os.getcwd()}/{self._csv.filename}'
+
     
 class Candidate:
     def __init__(self, first_name, last_name):
         self.first_name = first_name
         self.last_name = last_name        
+
+
+class CSV:
+    def __init__(self, filename, fields, data):
+        self.filename = f'{filename}.csv'
+        self.fields = fields
+        self.data = data
 
 
 class Message:
