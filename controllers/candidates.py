@@ -44,6 +44,10 @@ class CreateCandidateController:
         self._request = request
         
     @property
+    def validator(self):
+        return _CreateCandidateValidator    
+        
+    @property
     def serializer(self):
         return _CandidateSingleSerializer    
 
@@ -52,6 +56,7 @@ class CreateCandidateController:
         return _CandidateRetriever()
 
     def create_candidate(self):
+        validator = self.validator(self._request).validate()
         retrieved_candidate = self.retriever.get_one()
         return self.serializer(retrieved_candidate).serialize(self._request.path), http.HTTPStatus.CREATED
         
@@ -59,7 +64,7 @@ class CreateCandidateController:
 class UpdateCandidateController:
     def __init__(self, request):
         self._request = request
-    
+        
     @property    
     def serializer(self):
         return _CandidateSingleSerializer  
@@ -109,6 +114,46 @@ class GenerateCandidateCSVController:
         return self.serializer(csv_retriever.retrieve_csv_path()).serialize(self._request.path), http.HTTPStatus.OK
 
 
+class _CreateCandidateValidator:
+    def __init__(self, request):
+        self._request = request
+        self._json_body = request.get_json()
+        
+    @property
+    def serializer(self):
+        return _ErrorSerializer
+    
+    def validate(self):
+        self.first_name_required()
+        self.last_name_required()
+        self.email_required()
+        
+    def first_name_required(self):
+        if 'first_name' not in self._json_body:
+            return self.serializer('first_name is required').serialize(self._request.path), http.HTTPStatus.BAD_REQUEST
+            
+    def last_name_required(self):
+        if 'last_name' not in self._json_body:
+            return self.serializer('last_name is required').serialize(self._request.path), http.HTTPStatus.BAD_REQUEST
+    
+    def email_required(self):
+        if 'email' not in self._json_body:
+            return self.serializer('email is required').serialize(self._request.path), http.HTTPStatus.BAD_REQUEST
+    
+    
+class _ErrorSerializer:
+    def __init__(self, message):
+        self._message = message
+        
+    def serialize(self, path):
+        return {
+            "path": path,
+            "data": {
+                "message": self._message
+            }
+        }    
+        
+    
 class _CandidateSingleSerializer:
     def __init__(self, candidate):
         self.candidate = candidate
