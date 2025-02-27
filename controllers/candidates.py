@@ -42,6 +42,7 @@ class GetCandidateController:
 class CreateCandidateController:
     def __init__(self, request):
         self._request = request
+        self._json_body = request.get_json()
         
     @property
     def validator(self):
@@ -56,12 +57,12 @@ class CreateCandidateController:
         return _CandidateRetriever()
 
     def create_candidate(self):
-        validator_error = self.validator(self._request).validate()
-        if validator_error:
-            return validator_error
-        retrieved_candidate = self.retriever.get_one()
-        return self.serializer(retrieved_candidate).serialize(self._request.path), http.HTTPStatus.CREATED
-        
+        try:
+            self.validator(self._json_body).validate()
+            retrieved_candidate = self.retriever.get_one()
+            return self.serializer(retrieved_candidate).serialize(self._request.path), http.HTTPStatus.CREATED
+        except _ValidationError as e:
+            return _ErrorSerializer(e._message).serialize(self._request.path), http.HTTPStatus.BAD_REQUEST
 
 class UpdateCandidateController:
     def __init__(self, request):
@@ -117,38 +118,34 @@ class GenerateCandidateCSVController:
 
 
 class _CreateCandidateValidator:
-    def __init__(self, request):
-        self._request = request
-        self._json_body = request.get_json()
+    def __init__(self, json_body):
+        self._json_body = json_body
         
     @property
     def serializer(self):
         return _ErrorSerializer
     
     def validate(self):
-        first_name_error = self.first_name_required()
-        if first_name_error:
-            return first_name_error
-        
-        last_name_error = self.last_name_required()
-        if last_name_error:
-            return last_name_error
-        
-        email_error = self.email_required()
-        if email_error:
-            return email_error
+        self.first_name_required()
+        self.last_name_required()
+        self.email_required()
         
     def first_name_required(self):
-        if 'first_name' not in self._json_body:
-            return self.serializer('first_name is required').serialize(self._request.path), http.HTTPStatus.BAD_REQUEST
+        if 'firstname' not in self._json_body:
+            raise _ValidationError('first_name is required')
             
     def last_name_required(self):
-        if 'last_name' not in self._json_body:
-            return self.serializer('last_name is required').serialize(self._request.path), http.HTTPStatus.BAD_REQUEST
+        if 'lastname' not in self._json_body:
+            raise _ValidationError('last_name is required')
     
     def email_required(self):
         if 'email' not in self._json_body:
-            return self.serializer('email is required').serialize(self._request.path), http.HTTPStatus.BAD_REQUEST
+            raise _ValidationError('email is required')
+
+
+class _ValidationError(Exception):
+    def __init__(self, message):
+        self._message = message
     
     
 class _ErrorSerializer:
