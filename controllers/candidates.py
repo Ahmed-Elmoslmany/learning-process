@@ -56,7 +56,9 @@ class CreateCandidateController:
         return _CandidateRetriever()
 
     def create_candidate(self):
-        validator = self.validator(self._request).validate()
+        validator_error = self.validator(self._request).validate()
+        if validator_error:
+            return validator_error
         retrieved_candidate = self.retriever.get_one()
         return self.serializer(retrieved_candidate).serialize(self._request.path), http.HTTPStatus.CREATED
         
@@ -124,9 +126,17 @@ class _CreateCandidateValidator:
         return _ErrorSerializer
     
     def validate(self):
-        self.first_name_required()
-        self.last_name_required()
-        self.email_required()
+        first_name_error = self.first_name_required()
+        if first_name_error:
+            return first_name_error
+        
+        last_name_error = self.last_name_required()
+        if last_name_error:
+            return last_name_error
+        
+        email_error = self.email_required()
+        if email_error:
+            return email_error
         
     def first_name_required(self):
         if 'first_name' not in self._json_body:
