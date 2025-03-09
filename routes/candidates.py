@@ -20,8 +20,8 @@ def generate_candidate_report():
 
 @app.route('/candidates/<int:id>', methods=['PUT'])
 def update_candidate(id):
-    return candidates.UpdateCandidateController(fl.request).update_candidate()
+    return candidates.UpdateCandidateController(fl.request).update_candidate(id)
 
 @app.route('/candidates/<int:id>', methods=['DELETE'])
 def delete_candidate(id):
-    return candidates.DeleteCandidateContoller(fl.request).delete_candidate()
+    return candidates.DeleteCandidateController(fl.request).delete_candidate(id)

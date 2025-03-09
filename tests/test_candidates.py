@@ -49,6 +49,48 @@ class TestDeleteCandidateController(unittest.TestCase):
         assert_that(response.get('path')).is_equal_to('/candidates/<int:id>')
         assert_that(status_code).is_equal_to(http.HTTPStatus.OK)        
 
+
+class TestCreateCandidateValidator(unittest.TestCase):
+    def setUp(self):
+        self.validator = candidates._CreateCandidateValidator()
+        
+    def test_first_name_required(self):
+        with self.assertRaises(candidates._RequiredInputError) as exc:
+            self.validator.validate({"lastname": "elmoslmany"})
+        assert_that(str(exc.exception)).is_equal_to("firstName is required")
+
+    def test_invalid_email(self):
+        with self.assertRaises(candidates._InvalidInputError) as exc:
+            self.validator.validate({
+                "firstName": "ahmed",
+                "lastName": "elmoslmany",
+                "email": "ahmedelmoslmany74gmail.com",
+                "age" : 22,
+                "birthDate": "15-10-2002"
+            })
+        assert_that(str(exc.exception)).is_equal_to('invalid email address')    
+
+    def test_invalid_age_more_than_80_years(self):
+        with self.assertRaises(candidates._InvalidInputError) as exc:
+            self.validator.validate({
+                "firstName": "ahmed",
+                "lastName": "elmoslmany",
+                "email": "ahmedelmoslmany74@gmail.com",
+                "age" : 81,
+                "birthDate": "15-10-2002"
+            })
+        assert_that(str(exc.exception)).is_equal_to('invalid age')
+    
+    def test_invalid_birth_date_(self):
+        with self.assertRaises(candidates._InvalidInputError) as exc:
+            self.validator.validate({
+                "firstName": "ahmed",
+                "lastName": "elmoslmany",
+                "email": "ahmedelmoslmany74@gmail.com",
+                "age" : 22,
+                "birthDate": "15-10-2010"
+            })
+        assert_that(str(exc.exception)).is_equal_to('invalid birth date')        
                 
 class TestCandidatesCollectionSerializer(unittest.TestCase):
     def test_serialize_candidates_successfully(self):
@@ -105,6 +147,10 @@ class MessageDouble:
     def __init__(self, message):
         self.message = message
         
+
+class _RequiredInputErrorDouble(Exception):
+    def __init__(self, message):
+        self._message = message
 
     
 if __name__ == '__main__':
