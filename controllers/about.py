@@ -1,47 +1,31 @@
 import http
+import about
 
 class GetInformationAboutProject:
     def __init__(self, request):
         self._request = request
     
     @property
-    def serialize(self):
-        return _AboutProjectInformationSerializer
-    
-    @property
-    def retriver(self):
-        return _ProjectInformationRetriver('about.txt')
+    def serializer(self):
+        return _AboutProjectInformationSerializer()
     
     def get_information(self):
-        information_file = self.retriver.read_infomation_file()
-        information_array = self.retriver.get_information_array(information_file)
-        return _AboutProjectInformationSerializer(information_array).serialize(self._request.path), http.HTTPStatus.OK
+        return self.serializer.serialize(self._request.path), http.HTTPStatus.OK
 
 
-class _AboutProjectInformationSerializer:
-    def __init__(self, lines):
-        self._lines = lines
-        
+class _AboutProjectInformationSerializer: 
+            
     def serialize(self, path):
-        information_object = {
-            "path": path
+        return {
+            "path": path,
+            "project": about.project,
+            "package": about.package,
+            "description": about.description,
+            "copyright": about.copyright,
+            "author": about.author,
+            "author_email": about.author_email,
+            "release": about.release,
+            "build_number": about.build_number,
+            "version": about.version,
         }
-        for line in self._lines:
-            raw = line.strip().replace('"', '').replace(" ", '').replace('-', ' ').split('=')
-            information_object[raw[0]] = raw[1]
-        return information_object
-    
-    
-class _ProjectInformationRetriver:
-    def __init__(self, file_name):
-        self._file_name = file_name
         
-    def read_infomation_file(self):
-        file = open(self._file_name, 'r')
-        return file
-    
-    def get_information_array(self, file):
-        lines = []
-        for line in file:
-            lines.append(line)
-        return lines
