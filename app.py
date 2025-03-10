@@ -12,6 +12,7 @@ db.init_app(app)
 migrate = fm.Migrate(app, db)
 
 from routes.candidates import *
+from routes.about import *
 
 if(__name__ == '__main__'):
     app.run()
