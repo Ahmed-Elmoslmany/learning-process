@@ -1,5 +1,6 @@
 import models
-import services.exceptions as exc
+import services.utils.exceptions as exc
+import sqlalchemy.exc as alchemyExc
 
 class CurdOperator:
     def __init__(self, model, session=None):
@@ -15,9 +16,18 @@ class CurdOperator:
     def get_by_id(self, id):
         try:
             record = self.session.query(self.model).get(id)
+            if not record:
+                raise exc.RecordNotFound(f'record with id: {id} not found')
             return record
         except exc.SqlAlchemyError as e:
             raise exc.CrudOperatorError('error fetching record', 'get_by_ids')     
+    
+    def get_one(self, **filters):
+        try:
+            record = self.session.query(self.model).filter_by(**filters).first()
+            return record
+        except exc.SqlAlchemyError as e:
+            raise exc.CrudOperatorError('error fetching record', 'get_one')    
     
     def create(self, json_body):
         try:
@@ -25,7 +35,7 @@ class CurdOperator:
             self.session.add(new_record)
             self.session.commit()
             return new_record
-        except exc.SqlAlchemyError as e:
+        except alchemyExc.SQLAlchemyError as e:
             raise exc.CrudOperatorError('error add record', 'create')        
     
     def update(self, id, json_body):

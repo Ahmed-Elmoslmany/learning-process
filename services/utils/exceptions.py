@@ -8,10 +8,22 @@ class InvalidInputError(Exception):
         self._message = message
 
 
+class RecordAlreadyExistError(Exception):
+    def __init__(self, message):
+        self._message = message
+
+
 class RecordNotFound(Exception):
     def __init__(self, message):
         self._message = message
 
+
+class AuthorizationError(Exception):
+    def __init__(self, message, status = None, path = None):
+        self._message = message
+        self._status = status
+        self._path = path
+        
 
 class SqlAlchemyError(Exception):
     def __init__(self, message, method):
